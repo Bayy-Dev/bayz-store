@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 // ── CONFIG ──
 const PAKASIR_SLUG   = process.env.PAKASIR_SLUG   || 'bayyzofc';
 const PAKASIR_APIKEY = process.env.PAKASIR_APIKEY  || 'pRPQmKpKKvYo4lH4WwGfbQfo1TaLtkSg';
-const HARGA_AKUN     = 2000; // Rp 2.000
+const HARGA_AKUN     = 500; // TESTING // Rp 2.000
 
 // ── DATA FILES ──
 const DATA_DIR      = path.join(__dirname, 'data');
