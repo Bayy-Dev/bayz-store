@@ -93,27 +93,31 @@ app.post('/api/order/create', async (req, res) => {
   const orderId = 'ORD-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
 
   try {
-    const response = await fetch(`https://app.pakasir.com/api/v1/transaction/create`, {
+    // Format Pakasir: POST /api/transactioncreate/qris
+    const response = await fetch(`https://app.pakasir.com/api/transactioncreate/qris`, {
       method:  'POST',
-      headers: {
-        'Content-Type':  'application/json',
-        'Authorization': `Bearer ${PAKASIR_APIKEY}`,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        merchant:    PAKASIR_SLUG,
-        amount:      HARGA_AKUN,
-        order_id:    orderId,
-        description: `Beli 1 Akun AM - ${username}`,
-        payment_method: 'qris',
+        project:  PAKASIR_SLUG,
+        order_id: orderId,
+        amount:   HARGA_AKUN,
+        api_key:  PAKASIR_APIKEY,
       }),
     });
 
     const data = await response.json();
+    console.log('Pakasir response:', JSON.stringify(data));
 
-    if (!data || data.status === 'error' || !data.data) {
+    // Response: { payment: { payment_number, payment_url, expired_at, ... } }
+    if (!data || !data.payment) {
       console.error('Pakasir error:', data);
       return res.status(500).json({ error: 'Gagal membuat transaksi. Coba lagi.' });
     }
+
+    const qrisString = data.payment.payment_number || null;
+    const expiredAt  = data.payment.expired_at
+      ? new Date(data.payment.expired_at).getTime()
+      : Date.now() + 15 * 60 * 1000;
 
     // Simpan order ke file
     const orders = readJSON(ORDERS_FILE);
@@ -123,21 +127,18 @@ app.post('/api/order/create', async (req, res) => {
       username,
       amount:     HARGA_AKUN,
       status:     'pending',
-      qrisUrl:    data.data.qr_url   || null,
-      qrisString: data.data.qr_string || null,
-      pakasirId:  data.data.id        || null,
+      qrisString,
       createdAt:  Date.now(),
-      expiredAt:  Date.now() + 15 * 60 * 1000, // 15 menit
+      expiredAt,
     });
     writeJSON(ORDERS_FILE, orders);
 
     res.json({
       ok:         true,
       orderId,
-      qrisUrl:    data.data.qr_url    || null,
-      qrisString: data.data.qr_string || null,
+      qrisString,
       amount:     HARGA_AKUN,
-      expiredAt:  Date.now() + 15 * 60 * 1000,
+      expiredAt,
     });
 
   } catch (err) {
@@ -174,13 +175,18 @@ app.post('/api/order/check', async (req, res) => {
   }
 
   try {
-    // Cek ke Pakasir
-    const response = await fetch(`https://app.pakasir.com/api/v1/transaction/${order.pakasirId}`, {
-      headers: { 'Authorization': `Bearer ${PAKASIR_APIKEY}` },
+    // Cek ke Pakasir: GET /api/transactiondetail
+    const params = new URLSearchParams({
+      project:  PAKASIR_SLUG,
+      order_id: orderId,
+      amount:   order.amount,
+      api_key:  PAKASIR_APIKEY,
     });
+    const response = await fetch(`https://app.pakasir.com/api/transactiondetail?${params}`);
     const data = await response.json();
+    console.log('Pakasir check:', JSON.stringify(data));
 
-    const paid = data?.data?.status === 'paid' || data?.data?.status === 'success';
+    const paid = data?.transaction?.status === 'completed';
 
     if (paid) {
       // Ambil akun dari stok

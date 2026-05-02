@@ -164,15 +164,12 @@ async function beliAkun() {
 function openPayment(data) {
   document.getElementById('qris-amount').textContent = 'Rp ' + data.amount.toLocaleString('id-ID');
 
-  // QRIS image
+  // QRIS image dari string
   const qrisImg = document.getElementById('qris-img');
-  if (data.qrisUrl) {
-    qrisImg.src = data.qrisUrl;
-  } else if (data.qrisString) {
-    // Generate QR dari string pakai API publik
+  if (data.qrisString) {
     qrisImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(data.qrisString)}`;
   } else {
-    qrisImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=NOQRIS`;
+    qrisImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=QRIS-ERROR`;
   }
 
   document.getElementById('payment-modal').style.display = 'flex';
