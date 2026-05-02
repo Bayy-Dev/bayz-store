@@ -162,7 +162,12 @@ async function beliAkun() {
 
 // ── PAYMENT MODAL ──
 function openPayment(data) {
-  document.getElementById('qris-amount').textContent = 'Rp ' + data.amount.toLocaleString('id-ID');
+  const fmt = n => 'Rp ' + (n||0).toLocaleString('id-ID');
+
+  // Breakdown harga
+  document.getElementById('qris-harga').textContent = fmt(data.amount);
+  document.getElementById('qris-fee').textContent   = fmt(data.fee || 0);
+  document.getElementById('qris-total').textContent = fmt(data.totalPayment || data.amount);
 
   // QRIS image dari string
   const qrisImg = document.getElementById('qris-img');

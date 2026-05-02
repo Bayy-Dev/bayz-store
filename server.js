@@ -114,8 +114,10 @@ app.post('/api/order/create', async (req, res) => {
       return res.status(500).json({ error: 'Gagal membuat transaksi. Coba lagi.' });
     }
 
-    const qrisString = data.payment.payment_number || null;
-    const expiredAt  = data.payment.expired_at
+    const qrisString   = data.payment.payment_number || null;
+    const fee          = data.payment.fee          || 0;
+    const totalPayment = data.payment.total_payment || HARGA_AKUN;
+    const expiredAt    = data.payment.expired_at
       ? new Date(data.payment.expired_at).getTime()
       : Date.now() + 15 * 60 * 1000;
 
@@ -125,19 +127,23 @@ app.post('/api/order/create', async (req, res) => {
       orderId,
       userId,
       username,
-      amount:     HARGA_AKUN,
-      status:     'pending',
+      amount:       HARGA_AKUN,
+      fee,
+      totalPayment,
+      status:       'pending',
       qrisString,
-      createdAt:  Date.now(),
+      createdAt:    Date.now(),
       expiredAt,
     });
     writeJSON(ORDERS_FILE, orders);
 
     res.json({
-      ok:         true,
+      ok:           true,
       orderId,
       qrisString,
-      amount:     HARGA_AKUN,
+      amount:       HARGA_AKUN,
+      fee,
+      totalPayment,
       expiredAt,
     });
 

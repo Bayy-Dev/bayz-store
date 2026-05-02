@@ -293,7 +293,22 @@
     <div class="qris-wrap">
       <img id="qris-img" src="" alt="QRIS">
     </div>
-    <div class="qris-amount" id="qris-amount">Rp 500</div>
+    <!-- Breakdown harga -->
+    <div style="width:100%;background:rgba(255,255,255,0.05);border-radius:12px;padding:12px 16px;margin-bottom:12px;text-align:left;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:#94a3b8;margin-bottom:6px;">
+        <span>Harga Akun</span>
+        <span id="qris-harga">-</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:#94a3b8;margin-bottom:8px;">
+        <span>Biaya Admin</span>
+        <span id="qris-fee">-</span>
+      </div>
+      <div style="height:1px;background:rgba(255,255,255,0.08);margin-bottom:8px;"></div>
+      <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:800;color:#c084fc;">
+        <span>Total Bayar</span>
+        <span id="qris-total">-</span>
+      </div>
+    </div>
     <div class="qris-timer">Berlaku: <span id="qris-timer">15:00</span></div>
     <button class="btn-cek" id="btn-cek" onclick="cekPembayaran()">
       🔍 Cek Status Pembayaran
